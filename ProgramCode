@@ -1,0 +1,251 @@
+## Program Arduino ##
+
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <ESP32Servo.h>
+
+// WIFI
+
+const char* ssid = "Kelompok 2";
+const char* password = "12345678";
+
+// MQTT
+
+const char* mqtt_server = "192.168.1.5";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+// PIN CONFIG
+
+// LDR MODEL X
+#define LDR_ATAS    34
+#define LDR_BAWAH   35
+#define LDR_KIRI    32
+#define LDR_KANAN   33
+
+#define ACS712_PIN     36
+#define TEGANGAN_PIN   39
+#define CAHAYA_PIN     25
+#define BATTERY_PIN    4
+
+#define SERVO_HORIZONTAL 26
+#define SERVO_VERTICAL   27
+
+// SERVO
+
+Servo servoH;
+Servo servoV;
+
+int posisiH = 90;
+int posisiV = 90;
+
+// WIFI CONNECT
+
+void setup_wifi() {
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+  }
+}
+
+// MQTT RECONNECT
+
+void reconnect() {
+
+  while (!client.connected()) {
+
+    client.connect("ESP32_PLTS_TRACKER");
+  }
+}
+
+// SETUP
+
+void setup() {
+
+  Serial.begin(115200);
+
+  setup_wifi();
+
+  client.setServer(mqtt_server, 1883);
+
+  // Attach Servo
+  servoH.attach(SERVO_HORIZONTAL);
+  servoV.attach(SERVO_VERTICAL);
+
+  servoH.write(posisiH);
+  servoV.write(posisiV);
+}
+
+// LOOP
+
+void loop() {
+
+  if (!client.connected()) {
+    reconnect();
+  }
+
+  client.loop();
+
+  // SENSOR LDR
+ 
+  int atas  = analogRead(LDR_ATAS);
+  int bawah = analogRead(LDR_BAWAH);
+
+  int kiri  = analogRead(LDR_KIRI);
+  int kanan = analogRead(LDR_KANAN);
+
+  // TRACKING HORIZONTAL
+
+  if (kiri > kanan + 50) {
+    posisiH--;
+  }
+  else if (kanan > kiri + 50) {
+    posisiH++;
+  }
+
+  // TRACKING VERTIKAL
+
+  if (atas > bawah + 50) {
+    posisiV++;
+  }
+  else if (bawah > atas + 50) {
+    posisiV--;
+  }
+
+  // BATASAN GERAK SERVO
+
+  posisiH = constrain(posisiH, 10, 170);
+  posisiV = constrain(posisiV, 20, 160);
+
+  // GERAKKAN SERVO
+
+  servoH.write(posisiH);
+  servoV.write(posisiV);
+
+  // SENSOR ARUS
+
+  float arus =
+    analogRead(ACS712_PIN) * (5.0 / 4095.0);
+
+  float tegangan =
+    analogRead(TEGANGAN_PIN) * (25.0 / 4095.0);
+
+  float daya =
+    tegangan * arus;
+
+  // SENSOR FLUKSMETER
+
+  int intensitasCahaya =
+    analogRead(CAHAYA_PIN);
+
+  // STATUS BATERAI
+
+  float batteryVoltage =
+    analogRead(BATTERY_PIN)
+    * (14.0 / 4095.0);
+
+  String batteryStatus;
+
+  if (batteryVoltage > 12.5) {
+
+    batteryStatus = "FULL";
+  }
+  else if (batteryVoltage > 11.8) {
+
+    batteryStatus = "NORMAL";
+  }
+  else {
+
+    batteryStatus = "LOW";
+  }
+
+  // STATUS TRACKING
+
+  String statusTracker;
+
+  if (abs(kiri - kanan) < 30 &&
+      abs(atas - bawah) < 30) {
+
+    statusTracker = "TERKUNCI";
+  }
+  else {
+
+    statusTracker = "TRACKING";
+  }
+
+  // JSON MQTT
+
+  String payload = "{";
+
+  payload += "\"atas\":";
+  payload += String(atas);
+  payload += ",";
+
+  payload += "\"bawah\":";
+  payload += String(bawah);
+  payload += ",";
+
+  payload += "\"kiri\":";
+  payload += String(kiri);
+  payload += ",";
+
+  payload += "\"kanan\":";
+  payload += String(kanan);
+  payload += ",";
+
+  payload += "\"tegangan\":";
+  payload += String(tegangan);
+  payload += ",";
+
+  payload += "\"arus_pv\":";
+  payload += String(arus);
+  payload += ",";
+
+  payload += "\"daya_pv\":";
+  payload += String(daya);
+  payload += ",";
+
+  payload += "\"cahaya\":";
+  payload += String(intensitasCahaya);
+  payload += ",";
+
+  payload += "\"servo_h\":";
+  payload += String(posisiH);
+  payload += ",";
+
+  payload += "\"servo_v\":";
+  payload += String(posisiV);
+  payload += ",";
+
+  payload += "\"status_tracker\":\"";
+  payload += statusTracker;
+  payload += "\"";
+
+  payload += ",";
+
+  payload += "\"battery_status\":\"";
+  payload += batteryStatus;
+  payload += "\"";
+
+  payload += "}";
+
+  // =====================================
+  // MQTT PUBLISH
+  // =====================================
+
+  client.publish(
+    "plts/data",
+    payload.c_str()
+  );
+
+  // =====================================
+  // SERIAL MONITOR
+  // =====================================
+
+  Serial.println(payload);
+
+  delay(1000);
+}
