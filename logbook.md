@@ -88,8 +88,8 @@ Anggota
 
 #### Yang akan dilakukan
 
-- Melanjutkan assembly, PIC: @Nabileft, @ramaniaalifa11, @billyhermawan998
-- Menyusun rangkaian elektronik, PIC:@billyhermawan998, @ramaniaalifa11, @Nabileft 
+- [ ] Melanjutkan assembly, PIC: @Nabileft, @ramaniaalifa11, @billyhermawan998
+- [ ] Menyusun rangkaian elektronik, PIC:@billyhermawan998, @ramaniaalifa11, @Nabileft 
 
 #### Catatan
 
@@ -108,13 +108,12 @@ Anggota
 
 #### Yang akan dilakukan
 
-- Menyelesaikan rangkaian elektronik, PIC: @billyhermawan998
-- Menyelesaikan bagian mekanikal panel surya, PIC: @Nabileft
-- Membuat program pada Arduino IDE dan dashboard monitoring, PIC: @ramaniaalifa11
+- [ ] Menyelesaikan rangkaian elektronik, PIC: @billyhermawan998
+- [ ] Menyelesaikan bagian mekanikal panel surya, PIC: @Nabileft
+- [ ]Membuat program pada Arduino IDE dan dashboard monitoring, PIC: @ramaniaalifa11
 
 #### Catatan
 
 - Proses percobaan dashboard baru bisa dilakukan setelah rangkaian elektronik selesai
-
 
 #### Catatan
