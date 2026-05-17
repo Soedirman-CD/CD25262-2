@@ -1,5 +1,11 @@
 # CD25262-2
 Capstone Design 25/26 Smt 2 Kelompok 2
+
+# Nama Anggota:
+1. Ramania Nur Alifa     H1A023048
+2. Nabil Emillul Fata    H1A023052
+3. Billy Hermawan        H1A023074
+
 # Dual Axis Solar Panel Tracker
   Dual Axis Solar Panel Tracker merupakan sistem energi terbarukan yang dirancang untuk memaksimalkan penyerapan energi matahari dengan cara menggerakkan panel surya secara otomatis mengikuti arah pergerakan matahari. Berbeda dengan panel surya statis, sistem ini menggunakan dua sumbu pergerakan (horizontal dan vertikal) sehingga panel dapat selalu berada pada posisi optimal terhadap cahaya matahari sepanjang hari.
   Proyek ini mengintegrasikan sensor, mikrokontroler, dan mekanisme aktuator untuk meningkatkan efisiensi panel surya serta mendukung pengembangan teknologi energi berkelanjutan.
