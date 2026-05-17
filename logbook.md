@@ -1,4 +1,4 @@
-## Logbook Kelompok X
+## Logbook Kelompok 2
 
 Mata kuliah: Capstone Design
 
@@ -6,109 +6,115 @@ Semester: Gasal 2025/2026
 
 Anggota
 
-1. Mahasiswa: @mahasiswa
-2. Mahasiswa @mahasiswa
+1. Ramania Nur Alifa: @ramaniaalifa11
+2. Nabil Emillul Fata: @Nabileft
+3. Billy Hermawan: @billyhermawan998
 
-### 28 Okt 2025
+### 27 Februari 2026
 
 #### Yang sudah dilakukan
 
-- Belum ada :sweat_smile:
+- Menyusun konsep proyek
+- Membuat desain 3D
+- Menyusun laporan DCP 100
+- Menyusun PPT DCP 100
 
 #### Masalah yang dihadapi
 
-- Belum ada
+- Masih terdapat kesalahan pada format penulisan dokumen 
 
 #### Yang akan dilakukan
 
-- [ ] Mendaftar apa saja yang akan dilakukan, PIC: @mahasiswa
+- [ ] Memaparkan PPT DCP 100, PIC: @ramaniaalifa11, @Nabileft, @billyhermawan998
+- [ ] Memperbaiki format dan isi laporan DCP 100, PIC: @ramaniaalifa11, @Nabileft
+- [ ] Memperbaiki gambar pada laporan DCP 100, PIC: @billyhermawan998, @Nabileft
 
 #### Catatan
 
-- Perlu baca kembali dokumen desain
-- Lihat detil untuk masing-masing komponen desain
+- Perlu baca kembali dokumen perancangan
 
-### 04 Nov 2025
+### 16 Maret 2026
 
 #### Yang sudah dilakukan
 
-- Memasang kabel USB ke mikrokontroler untuk cek deteksi perangkat
-- Mencari pustaka untuk mengambil gambar via webcam
-
+- Menyusun laporan DCP 200
+- Menyusun PPT DCP 200
+  
 #### Masalah yang dihadapi
 
-- Kabel USB rusak
-- Program pengambil gambar tidak dapat dikompilasi
+- Kesalahan pada beberapa bagian isi laporan
 
 #### Yang akan dilakukan
 
-- [ ] Membeli kabel USB di toko sebelah, PIC: @ahmad
-- [ ] Mencari solusi masalah kompilasi program pengambil gambar, PIC: @mahasiswa
+- [ ] Memaparkan PPT DCP 200, PIC: @ramaniaalifa11, @Nabileft, @billyhermawan998
+- [ ] Memperbaiki penulisan laporan DCP 200, PIC: @ramaniaalifa11, @Nabileft, @billyhermawan998
 
 #### Catatan
 
-- Kabel USB 2.0, bukan 1.0
-- Mungkin masalah kompilasi adalah versi pustaka A lama
+- Lebih teliti dalam penyusunan laporan
 
-### 11 Nov 2025
+### 4 April 2026
 
 #### Yang sudah dilakukan
 
-- Membeli kabel USB 2.0 di toko yang satunya
-- Mengkompilasi program pengambil gambar dan berhasil
-- Mengkompilasi satu fungsi untuk program kontroler
+- Menyusun laporan DCP 300
+- Menyusun PPT DCP 300
+- Mencari toko pembelian komponen
+- Membuat desain tambahan untuk tempat sensor LDR
 
 #### Masalah yang dihadapi
 
-- Fungsi C pada program kontroler membutuhkan pustaka Z
-- Program pengambil gambar bekerja tapi putus-putus
+- Memperbaiki kesalahan penulisan pada laporan
 
 #### Yang akan dilakukan
 
-- [ ] Mengunduh pustaka Z dan mengkompilasi kembali, PIC: @yoda
-- [ ] Mencari solusi gambar putus-putus, PIC: @ahmad
+- [ ] Memesan kebutuhan mekanik di toko CNC, PIC: @billyhermawan998
+- [ ] Memesan kebutuhan elektronik, PIC: @ramaniaalifa11, @billyhermawan998
+- [ ] Mencetak gear dan dudukan LDR menggunakan 3D printer, PIC: @Nabileft
 
 #### Catatan
 
-- Kemungkinan kecepatan (*speed*) kabel USB kurang
-- Perlu pinjam teman kabel USB 3.0 dan coba tes
+- Menggabungkan laporan DCP 100- DCP 300
 
-### 18 Nov 2025
+### 6 Mei 2026
 
 #### Yang sudah dilakukan
 
+- Merangkai bagian mekanikal
+
 #### Masalah yang dihadapi
 
+- Beberapa komponen tidak presisi
+
 #### Yang akan dilakukan
+
+- Melanjutkan assembly, PIC: @Nabileft, @ramaniaalifa11, @billyhermawan998
+- Menyusun rangkaian elektronik, PIC:@billyhermawan998, @ramaniaalifa11, @Nabileft 
 
 #### Catatan
 
-### 25 Nov 2025
+- Melengkapi komponen yang kurang
+
+### 8 Mei 2026
 
 #### Yang sudah dilakukan
 
+- Pemasangan panel surya pada tube tracker
+- Menyolder komponen elektronik
+
 #### Masalah yang dihadapi
 
+- Pengunci panel surya masih belum sesuai ukurannya
+
 #### Yang akan dilakukan
+
+- Menyelesaikan rangkaian elektronik, PIC: @billyhermawan998
+- Menyelesaikan bagian mekanikal panel surya, PIC: @Nabileft
+- Membuat program pada Arduino IDE dan dashboard monitoring, PIC: @ramaniaalifa11
 
 #### Catatan
 
-### 02 Des 2025
+- Proses percobaan dashboard baru bisa dilakukan setelah rangkaian elektronik selesai
 
-#### Yang sudah dilakukan
-
-#### Masalah yang dihadapi
-
-#### Yang akan dilakukan
-
-#### Catatan
-
-### 09 Des 2025
-
-#### Yang sudah dilakukan
-
-#### Masalah yang dihadapi
-
-#### Yang akan dilakukan
 
 #### Catatan
