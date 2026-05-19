@@ -1,0 +1,460 @@
+[
+    {
+        "id": "5eda47f28e0e6e37",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "mqtt1",
+        "type": "mqtt in",
+        "z": "5eda47f28e0e6e37",
+        "name": "MQTT PLTS",
+        "topic": "plts/data",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "broker1",
+        "inputs": 0,
+        "x": 130,
+        "y": 120,
+        "wires": [
+            [
+                "json1"
+            ]
+        ]
+    },
+    {
+        "id": "json1",
+        "type": "json",
+        "z": "5eda47f28e0e6e37",
+        "name": "Parse JSON",
+        "property": "payload",
+        "x": 310,
+        "y": 120,
+        "wires": [
+            [
+                "f_teg",
+                "f_aruspv",
+                "f_arusbeban",
+                "f_dayapv",
+                "f_dayabeban",
+                "f_ldr",
+                "f_status",
+                "b633250cd666cd07"
+            ]
+        ]
+    },
+    {
+        "id": "f_teg",
+        "type": "function",
+        "z": "5eda47f28e0e6e37",
+        "name": "Tegangan",
+        "func": "msg.payload = msg.payload.tegangan; return msg;",
+        "outputs": 1,
+        "x": 530,
+        "y": 40,
+        "wires": [
+            [
+                "g_teg"
+            ]
+        ]
+    },
+    {
+        "id": "f_aruspv",
+        "type": "function",
+        "z": "5eda47f28e0e6e37",
+        "name": "Arus PV",
+        "func": "msg.payload = msg.payload.arus_pv; return msg;",
+        "outputs": 1,
+        "x": 530,
+        "y": 80,
+        "wires": [
+            [
+                "g_aruspv"
+            ]
+        ]
+    },
+    {
+        "id": "f_arusbeban",
+        "type": "function",
+        "z": "5eda47f28e0e6e37",
+        "name": "Arus Beban",
+        "func": "msg.payload = msg.payload.arus_beban; return msg;",
+        "outputs": 1,
+        "x": 530,
+        "y": 120,
+        "wires": [
+            [
+                "g_arusbeban"
+            ]
+        ]
+    },
+    {
+        "id": "f_dayapv",
+        "type": "function",
+        "z": "5eda47f28e0e6e37",
+        "name": "Daya PV",
+        "func": "msg.payload = msg.payload.daya_pv; return msg;",
+        "outputs": 1,
+        "x": 530,
+        "y": 160,
+        "wires": [
+            [
+                "c_dayapv"
+            ]
+        ]
+    },
+    {
+        "id": "f_dayabeban",
+        "type": "function",
+        "z": "5eda47f28e0e6e37",
+        "name": "Daya Beban",
+        "func": "msg.payload = msg.payload.daya_beban; return msg;",
+        "outputs": 1,
+        "x": 530,
+        "y": 200,
+        "wires": [
+            [
+                "c_dayabeban"
+            ]
+        ]
+    },
+    {
+        "id": "f_ldr",
+        "type": "function",
+        "z": "5eda47f28e0e6e37",
+        "name": "Cahaya",
+        "func": "msg.payload = msg.payload.ldr; return msg;",
+        "outputs": 1,
+        "x": 530,
+        "y": 240,
+        "wires": [
+            [
+                "c_ldr"
+            ]
+        ]
+    },
+    {
+        "id": "f_status",
+        "type": "function",
+        "z": "5eda47f28e0e6e37",
+        "name": "Status Energi",
+        "func": "let pv = msg.payload.daya_pv;\nlet beban = msg.payload.daya_beban;\nif(pv > beban){ msg.payload = \"SURPLUS\"; }\nelse{ msg.payload = \"DEFISIT\"; }\nreturn msg;",
+        "outputs": 1,
+        "x": 530,
+        "y": 280,
+        "wires": [
+            [
+                "txt_status"
+            ]
+        ]
+    },
+    {
+        "id": "g_teg",
+        "type": "ui_gauge",
+        "z": "5eda47f28e0e6e37",
+        "name": "Tegangan",
+        "group": "grp1",
+        "order": 1,
+        "width": "4",
+        "height": "4",
+        "gtype": "gage",
+        "title": "",
+        "label": "Tegangan (V)",
+        "format": "",
+        "min": 0,
+        "max": 30,
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 760,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "g_aruspv",
+        "type": "ui_gauge",
+        "z": "5eda47f28e0e6e37",
+        "name": "Arus PV",
+        "group": "grp1",
+        "order": 2,
+        "width": "4",
+        "height": "4",
+        "gtype": "gage",
+        "title": "",
+        "label": "Arus PV (A)",
+        "format": "",
+        "min": 0,
+        "max": 10,
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 760,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "g_arusbeban",
+        "type": "ui_gauge",
+        "z": "5eda47f28e0e6e37",
+        "name": "Arus Beban",
+        "group": "grp1",
+        "order": 3,
+        "width": "4",
+        "height": "4",
+        "gtype": "gage",
+        "title": "",
+        "label": "Arus Beban (A)",
+        "format": "",
+        "min": 0,
+        "max": 10,
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 780,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "c_dayapv",
+        "type": "ui_chart",
+        "z": "5eda47f28e0e6e37",
+        "name": "Daya PV",
+        "group": "grp1",
+        "order": 4,
+        "width": 6,
+        "height": 3,
+        "label": "Daya PV (W)",
+        "chartType": "line",
+        "xformat": "HH:mm:ss",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "",
+        "removeOlderPoints": "",
+        "cutout": "",
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 760,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c_dayabeban",
+        "type": "ui_chart",
+        "z": "5eda47f28e0e6e37",
+        "name": "Daya Beban",
+        "group": "grp1",
+        "order": 5,
+        "width": 6,
+        "height": "4",
+        "label": "Daya Beban (W)",
+        "chartType": "line",
+        "xformat": "HH:mm:ss",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "",
+        "removeOlderPoints": "",
+        "cutout": "",
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 780,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c_ldr",
+        "type": "ui_chart",
+        "z": "5eda47f28e0e6e37",
+        "name": "Cahaya",
+        "group": "grp1",
+        "order": 6,
+        "width": 6,
+        "height": "4",
+        "label": "Cahaya (LDR)",
+        "chartType": "line",
+        "xformat": "HH:mm:ss",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "",
+        "removeOlderPoints": "",
+        "cutout": "",
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 760,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "txt_status",
+        "type": "ui_text",
+        "z": "5eda47f28e0e6e37",
+        "group": "grp1",
+        "order": 7,
+        "width": 6,
+        "height": "2",
+        "name": "Status Energi",
+        "label": "Status",
+        "format": "{{msg.payload}}",
+        "layout": "",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "x": 760,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "b633250cd666cd07",
+        "type": "function",
+        "z": "5eda47f28e0e6e37",
+        "name": "function 1",
+        "func": "msg.payload =\nmsg.payload.battery_status;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 360,
+        "wires": [
+            [
+                "b49fea8942e59b09"
+            ]
+        ]
+    },
+    {
+        "id": "b49fea8942e59b09",
+        "type": "ui_text",
+        "z": "5eda47f28e0e6e37",
+        "group": "grp1",
+        "order": 7,
+        "width": "6",
+        "height": "2",
+        "name": "",
+        "label": "Status Baterai",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 760,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "broker1",
+        "type": "mqtt-broker",
+        "name": "Local MQTT",
+        "broker": "localhost",
+        "port": "1883",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 15,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthQos": "0",
+        "willQos": "0"
+    },
+    {
+        "id": "grp1",
+        "type": "ui_group",
+        "name": "Monitoring PLTS",
+        "tab": "tab1",
+        "order": 1,
+        "width": 6
+    },
+    {
+        "id": "tab1",
+        "type": "ui_tab",
+        "name": "Dashboard PLTS",
+        "icon": "dashboard"
+    },
+    {
+        "id": "4c2be91afd9d0a67",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6"
+        }
+    }
+]
