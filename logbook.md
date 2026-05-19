@@ -110,10 +110,26 @@ Anggota
 
 - [ ] Menyelesaikan rangkaian elektronik, PIC: @billyhermawan998
 - [ ] Menyelesaikan bagian mekanikal panel surya, PIC: @Nabileft
-- [ ]Membuat program pada Arduino IDE dan dashboard monitoring, PIC: @ramaniaalifa11
+- [ ] Membuat program pada Arduino IDE dan dashboard monitoring, PIC: @ramaniaalifa11
 
 #### Catatan
 
 - Proses percobaan dashboard baru bisa dilakukan setelah rangkaian elektronik selesai
 
+### 18 Mei 2026
+
+#### Yang sudah dilakukan
+
+- [ ] Menyelesaikan masalah mekanikal kemarin yaitu pengunci panel surya
+- [ ] Melanjutkan menyolder komponen elektronik
+- [ ] Mencoba membuat dashboard
+
+#### Yang akan dilakukan
+
+- [ ] Melanjutkan mekanikal axis bagian bawah
+- [ ] Menyelesaikan bagian elektronik agar bisa di test
+- [ ] Melanjutkan mencoba mendesain dashboard
+
 #### Catatan
+
+- tidak ada
