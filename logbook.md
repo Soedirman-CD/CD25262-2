@@ -133,3 +133,17 @@ Anggota
 #### Catatan
 
 - tidak ada
+
+### 25 Mei 2026
+
+#### Yang sudah dilakukan
+
+- [ ] Menyelesaikan manufakturing keseluruhan mekanis, mulai dari pergerakan X maupun Y
+
+#### Yang akan dilakukan
+
+- [ ] maintenance sisi mekanis
+
+#### Catatan
+
+- tidak ada
