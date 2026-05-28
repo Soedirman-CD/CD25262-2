@@ -81,6 +81,9 @@ Anggota
 #### Yang sudah dilakukan
 
 - Merangkai bagian mekanikal
+- Membuat Baterai 3S Pararel Li ion 18650 1800mAh dengan modul mini UPS 12V sebagai BMS sederhana dan Boost Converter dari 3,7V ke 12V
+
+![Baterai 3S P](assets/batterysupply.jpg)
 
 #### Masalah yang dihadapi
 
@@ -134,6 +137,25 @@ Anggota
 
 - tidak ada
 
+### 22 Mei 2026
+
+#### Yang sudah dilakukan
+
+- [ ] Menyelesaikan rangkaian PCB secara keseluruhan
+- [ ] Melaukan unit testing dan kalibrasi seluruh sensor
+- [ ] Pemasangan aktuator servo di yaw dan pitch dan menyempurnakan sistem gerak trackingnya
+
+![Overlook Sistem Tracking](assets/overlooktracker.jpg)
+
+#### Yang akan dilakukan
+
+- [ ] Mencari alternatif lain dari sensor BH1750 Lux
+
+
+#### Catatan
+
+- Pada sensor BH1750 tidak tertampil, terdapat asumsi pin i2c esp32 rusak karena beli bekas atau sensor BH1750 yang rusak
+
 ### 25 Mei 2026
 
 #### Yang sudah dilakukan
@@ -147,3 +169,20 @@ Anggota
 #### Catatan
 
 - tidak ada
+
+### 28 Mei 2026
+
+#### Yang sudah dilakukan
+
+- [ ] Mengganti sensor BH1750 menjadi TEMT6000 
+- [ ] Melaukan unit testing pada TEMT6000
+- [ ] Menyempurnakan PCB
+
+![PCB PROJECT](assets/pcbcdproject.jpg)
+
+#### Yang akan dilakukan
+
+- [ ] Mencari pembanding untuk kalibrasi pada sensor lux meter TEMT6000
+
+## Catatan
+- [ ] Sensor TEMT6000 masih belum tau akurasinya karena tidak ada alat ukur besaran lux meter
