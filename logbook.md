@@ -123,15 +123,15 @@ Anggota
 
 #### Yang sudah dilakukan
 
-- [ ] Menyelesaikan masalah mekanikal kemarin yaitu pengunci panel surya
-- [ ] Melanjutkan menyolder komponen elektronik
-- [ ] Mencoba membuat dashboard
+- Menyelesaikan masalah mekanikal kemarin yaitu pengunci panel surya
+- Melanjutkan menyolder komponen elektronik
+- Mencoba membuat dashboard
 
 #### Yang akan dilakukan
 
-- [ ] Melanjutkan mekanikal axis bagian bawah
-- [ ] Menyelesaikan bagian elektronik agar bisa di test
-- [ ] Melanjutkan mencoba mendesain dashboard
+- [ ] Melanjutkan mekanikal axis bagian bawah, PIC: @Nabileft
+- [ ] Menyelesaikan bagian elektronik agar bisa di test, PIC: @billyhermawan998
+- [ ] Melanjutkan mencoba mendesain dashboard, PIC: @ramaniaalifa11
 
 #### Catatan
 
@@ -141,15 +141,15 @@ Anggota
 
 #### Yang sudah dilakukan
 
-- [ ] Menyelesaikan rangkaian PCB secara keseluruhan
-- [ ] Melaukan unit testing dan kalibrasi seluruh sensor
-- [ ] Pemasangan aktuator servo di yaw dan pitch dan menyempurnakan sistem gerak trackingnya
+- Menyelesaikan rangkaian PCB secara keseluruhan
+- Melakukan unit testing dan kalibrasi seluruh sensor
+- Pemasangan aktuator servo di yaw dan pitch dan menyempurnakan sistem gerak trackingnya
 
 ![Overlook Sistem Tracking](assets/overlooktracker.jpg)
 
 #### Yang akan dilakukan
 
-- [ ] Mencari alternatif lain dari sensor BH1750 Lux
+- [ ] Mencari alternatif lain dari sensor BH1750 Lux, PIC: @billyhermawan998
 
 
 #### Catatan
@@ -160,11 +160,11 @@ Anggota
 
 #### Yang sudah dilakukan
 
-- [ ] Menyelesaikan manufakturing keseluruhan mekanis, mulai dari pergerakan X maupun Y
+- Menyelesaikan manufakturing keseluruhan mekanis, mulai dari pergerakan X maupun Y
 
 #### Yang akan dilakukan
 
-- [ ] maintenance sisi mekanis
+- [ ] maintenance sisi mekanis,  PIC:@billyhermawan998, @ramaniaalifa11, @Nabileft 
 
 #### Catatan
 
@@ -174,15 +174,37 @@ Anggota
 
 #### Yang sudah dilakukan
 
-- [ ] Mengganti sensor BH1750 menjadi TEMT6000 
-- [ ] Melaukan unit testing pada TEMT6000
-- [ ] Menyempurnakan PCB
+- Mengganti sensor BH1750 menjadi TEMT6000 
+- Melaukan unit testing pada TEMT6000
+- Menyempurnakan PCB
 
 ![PCB PROJECT](assets/pcbcdproject.jpg)
 
 #### Yang akan dilakukan
 
-- [ ] Mencari pembanding untuk kalibrasi pada sensor lux meter TEMT6000
+- [ ] Mencari pembanding untuk kalibrasi pada sensor lux meter TEMT6000, PIC: @billyhermawan998
 
 ## Catatan
-- [ ] Sensor TEMT6000 masih belum tau akurasinya karena tidak ada alat ukur besaran lux meter
+- Sensor TEMT6000 masih belum tau akurasinya karena tidak ada alat ukur besaran lux meter
+
+### 3 Juni 2026
+
+#### Yang sudah dilakukan
+
+- Fiksasi mapping PCB, SCC dan baterai pada papan PLTS
+- Update program ESP32 pada arduino IDE
+- Update JSON flow pada node-red untuk tampilan dashboard
+- Revisi DCP 100-400
+- Menyusun DCP 500
+- Merapikan kabel wiring
+
+#### Masalah yang dihadapi
+
+- Dashboard belum bisa digunakan karena masih ada penambahan sensor
+
+#### Yang akan dilakukan
+
+-[ ] Menambahkan sensor arus ACS712, PIC: @billyhermawan998
+-[ ] Menambahkan MCB, PIC: @billyhermawan998
+-[ ] Finalisasi program ESP32 dan dashboard, PIC: @ramaniaalifa11
+-[ ] Membuat pamflet produk, PIC: @Nabileft
