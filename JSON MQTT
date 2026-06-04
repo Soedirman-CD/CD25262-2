@@ -1,456 +1,759 @@
 [
     {
-        "id": "5eda47f28e0e6e37",
+        "id": "tab_plts",
         "type": "tab",
-        "label": "Flow 1",
+        "label": "PLTS Dual Axis Tracker",
         "disabled": false,
-        "info": "",
-        "env": []
+        "info": ""
     },
     {
-        "id": "mqtt1",
+        "id": "mqtt_in",
         "type": "mqtt in",
-        "z": "5eda47f28e0e6e37",
+        "z": "tab_plts",
         "name": "MQTT PLTS",
         "topic": "plts/data",
         "qos": "0",
-        "datatype": "auto",
-        "broker": "broker1",
+        "datatype": "json",
+        "broker": "mqtt_broker",
         "inputs": 0,
-        "x": 130,
-        "y": 120,
-        "wires": [
-            [
-                "json1"
-            ]
-        ]
-    },
-    {
-        "id": "json1",
-        "type": "json",
-        "z": "5eda47f28e0e6e37",
-        "name": "Parse JSON",
-        "property": "payload",
-        "x": 310,
-        "y": 120,
-        "wires": [
-            [
-                "f_teg",
-                "f_aruspv",
-                "f_arusbeban",
-                "f_dayapv",
-                "f_dayabeban",
-                "f_ldr",
-                "f_status",
-                "b633250cd666cd07"
-            ]
-        ]
-    },
-    {
-        "id": "f_teg",
-        "type": "function",
-        "z": "5eda47f28e0e6e37",
-        "name": "Tegangan",
-        "func": "msg.payload = msg.payload.tegangan; return msg;",
-        "outputs": 1,
-        "x": 530,
-        "y": 40,
-        "wires": [
-            [
-                "g_teg"
-            ]
-        ]
-    },
-    {
-        "id": "f_aruspv",
-        "type": "function",
-        "z": "5eda47f28e0e6e37",
-        "name": "Arus PV",
-        "func": "msg.payload = msg.payload.arus_pv; return msg;",
-        "outputs": 1,
-        "x": 530,
-        "y": 80,
-        "wires": [
-            [
-                "g_aruspv"
-            ]
-        ]
-    },
-    {
-        "id": "f_arusbeban",
-        "type": "function",
-        "z": "5eda47f28e0e6e37",
-        "name": "Arus Beban",
-        "func": "msg.payload = msg.payload.arus_beban; return msg;",
-        "outputs": 1,
-        "x": 530,
-        "y": 120,
-        "wires": [
-            [
-                "g_arusbeban"
-            ]
-        ]
-    },
-    {
-        "id": "f_dayapv",
-        "type": "function",
-        "z": "5eda47f28e0e6e37",
-        "name": "Daya PV",
-        "func": "msg.payload = msg.payload.daya_pv; return msg;",
-        "outputs": 1,
-        "x": 530,
-        "y": 160,
-        "wires": [
-            [
-                "c_dayapv"
-            ]
-        ]
-    },
-    {
-        "id": "f_dayabeban",
-        "type": "function",
-        "z": "5eda47f28e0e6e37",
-        "name": "Daya Beban",
-        "func": "msg.payload = msg.payload.daya_beban; return msg;",
-        "outputs": 1,
-        "x": 530,
+        "x": 100,
         "y": 200,
         "wires": [
             [
-                "c_dayabeban"
+                "parse_json"
             ]
         ]
     },
     {
-        "id": "f_ldr",
-        "type": "function",
-        "z": "5eda47f28e0e6e37",
-        "name": "Cahaya",
-        "func": "msg.payload = msg.payload.ldr; return msg;",
-        "outputs": 1,
-        "x": 530,
-        "y": 240,
+        "id": "parse_json",
+        "type": "json",
+        "z": "tab_plts",
+        "name": "Parse JSON",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 280,
+        "y": 200,
         "wires": [
             [
-                "c_ldr"
+                "fn_tegangan",
+                "fn_arus_pv",
+                "fn_arus_beban",
+                "fn_daya_pv",
+                "fn_daya_beban",
+                "fn_cahaya",
+                "fn_status_energi",
+                "fn_status_baterai",
+                "fn_tracker",
+                "fn_ldr",
+                "fn_chart"
             ]
         ]
     },
     {
-        "id": "f_status",
+        "id": "fn_tegangan",
         "type": "function",
-        "z": "5eda47f28e0e6e37",
-        "name": "Status Energi",
-        "func": "let pv = msg.payload.daya_pv;\nlet beban = msg.payload.daya_beban;\nif(pv > beban){ msg.payload = \"SURPLUS\"; }\nelse{ msg.payload = \"DEFISIT\"; }\nreturn msg;",
-        "outputs": 1,
-        "x": 530,
-        "y": 280,
-        "wires": [
-            [
-                "txt_status"
-            ]
-        ]
-    },
-    {
-        "id": "g_teg",
-        "type": "ui_gauge",
-        "z": "5eda47f28e0e6e37",
+        "z": "tab_plts",
         "name": "Tegangan",
-        "group": "grp1",
-        "order": 1,
-        "width": "4",
-        "height": "4",
-        "gtype": "gage",
-        "title": "",
-        "label": "Tegangan (V)",
-        "format": "",
-        "min": 0,
-        "max": 30,
-        "colors": [
-            "#00b500",
-            "#e6e600",
-            "#ca3838"
-        ],
-        "seg1": "",
-        "seg2": "",
-        "diff": false,
-        "className": "",
-        "x": 760,
-        "y": 40,
-        "wires": []
+        "func": "msg.payload = parseFloat(msg.payload.tegangan);\nreturn msg;",
+        "outputs": 1,
+        "x": 500,
+        "y": 60,
+        "wires": [
+            [
+                "gauge_tegangan"
+            ]
+        ]
     },
     {
-        "id": "g_aruspv",
-        "type": "ui_gauge",
-        "z": "5eda47f28e0e6e37",
+        "id": "fn_arus_pv",
+        "type": "function",
+        "z": "tab_plts",
         "name": "Arus PV",
-        "group": "grp1",
-        "order": 2,
-        "width": "4",
-        "height": "4",
-        "gtype": "gage",
-        "title": "",
-        "label": "Arus PV (A)",
-        "format": "",
-        "min": 0,
-        "max": 10,
-        "colors": [
-            "#00b500",
-            "#e6e600",
-            "#ca3838"
-        ],
-        "seg1": "",
-        "seg2": "",
-        "diff": false,
-        "className": "",
-        "x": 760,
-        "y": 80,
-        "wires": []
+        "func": "msg.payload = parseFloat(msg.payload.arus_pv);\nreturn msg;",
+        "outputs": 1,
+        "x": 500,
+        "y": 100,
+        "wires": [
+            [
+                "gauge_arus_pv"
+            ]
+        ]
     },
     {
-        "id": "g_arusbeban",
-        "type": "ui_gauge",
-        "z": "5eda47f28e0e6e37",
+        "id": "fn_arus_beban",
+        "type": "function",
+        "z": "tab_plts",
         "name": "Arus Beban",
-        "group": "grp1",
-        "order": 3,
-        "width": "4",
-        "height": "4",
+        "func": "msg.payload = parseFloat(msg.payload.arus_beban);\nreturn msg;",
+        "outputs": 1,
+        "x": 500,
+        "y": 140,
+        "wires": [
+            [
+                "gauge_arus_beban"
+            ]
+        ]
+    },
+    {
+        "id": "fn_daya_pv",
+        "type": "function",
+        "z": "tab_plts",
+        "name": "Daya PV",
+        "func": "msg.payload = parseFloat(msg.payload.daya_pv);\nreturn msg;",
+        "outputs": 1,
+        "x": 500,
+        "y": 180,
+        "wires": [
+            [
+                "chart_daya_pv"
+            ]
+        ]
+    },
+    {
+        "id": "fn_daya_beban",
+        "type": "function",
+        "z": "tab_plts",
+        "name": "Daya Beban",
+        "func": "msg.payload = parseFloat(msg.payload.daya_beban);\nreturn msg;",
+        "outputs": 1,
+        "x": 500,
+        "y": 220,
+        "wires": [
+            [
+                "chart_daya_beban"
+            ]
+        ]
+    },
+    {
+        "id": "fn_cahaya",
+        "type": "function",
+        "z": "tab_plts",
+        "name": "Cahaya",
+        "func": "msg.payload = parseFloat(msg.payload.cahaya);\nreturn msg;",
+        "outputs": 1,
+        "x": 500,
+        "y": 260,
+        "wires": [
+            [
+                "chart_cahaya"
+            ]
+        ]
+    },
+    {
+        "id": "fn_status_energi",
+        "type": "function",
+        "z": "tab_plts",
+        "name": "Status Energi",
+        "func": "var d = msg.payload;\nmsg.payload = d.status_energi + ' | PV: ' + parseFloat(d.energi_pv).toFixed(2) + ' Wh | Beban: ' + parseFloat(d.energi_beban).toFixed(2) + ' Wh';\nreturn msg;",
+        "outputs": 1,
+        "x": 500,
+        "y": 300,
+        "wires": [
+            [
+                "text_status_energi"
+            ]
+        ]
+    },
+    {
+        "id": "fn_status_baterai",
+        "type": "function",
+        "z": "tab_plts",
+        "name": "function 1",
+        "func": "var d = msg.payload;\nvar soc = parseFloat(d.soc);\nvar status = d.status_baterai;\nvar icon = soc >= 80 ? '🔋' : soc >= 40 ? '🔋' : soc >= 20 ? '🪫' : '⚠️';\nmsg.payload = icon + ' ' + status + ' (' + soc.toFixed(1) + '%)';\nreturn msg;",
+        "outputs": 1,
+        "x": 500,
+        "y": 340,
+        "wires": [
+            [
+                "text_status_baterai"
+            ]
+        ]
+    },
+    {
+        "id": "fn_tracker",
+        "type": "function",
+        "z": "tab_plts",
+        "name": "Tracker",
+        "func": "var d = msg.payload;\nnode.send([\n  {payload: d.pos_h},\n  {payload: d.pos_v},\n  {payload: d.arah_yaw + ' | ' + d.arah_pitch},\n  {payload: d.mode}\n]);\n",
+        "outputs": 4,
+        "x": 500,
+        "y": 380,
+        "wires": [
+            [
+                "gauge_pos_h"
+            ],
+            [
+                "gauge_pos_v"
+            ],
+            [
+                "text_arah"
+            ],
+            [
+                "text_mode"
+            ]
+        ]
+    },
+    {
+        "id": "fn_ldr",
+        "type": "function",
+        "z": "tab_plts",
+        "name": "LDR",
+        "func": "var d = msg.payload;\nnode.send([\n  {payload: d.ldr_atas},\n  {payload: d.ldr_bawah},\n  {payload: d.ldr_kiri},\n  {payload: d.ldr_kanan}\n]);\n",
+        "outputs": 4,
+        "x": 500,
+        "y": 420,
+        "wires": [
+            [
+                "gauge_ldr_atas"
+            ],
+            [
+                "gauge_ldr_bawah"
+            ],
+            [
+                "gauge_ldr_kiri"
+            ],
+            [
+                "gauge_ldr_kanan"
+            ]
+        ]
+    },
+    {
+        "id": "fn_chart",
+        "type": "function",
+        "z": "tab_plts",
+        "name": "Chart Split",
+        "func": "var d = msg.payload;\nnode.send([\n  {payload: parseFloat(d.tegangan), topic: 'Tegangan (V)'},\n  {payload: parseFloat(d.arus_pv),  topic: 'Arus PV (A)'},\n  {payload: parseFloat(d.daya_pv),  topic: 'Daya PV (W)'}\n]);\n",
+        "outputs": 3,
+        "x": 500,
+        "y": 460,
+        "wires": [
+            [
+                "chart_main"
+            ],
+            [
+                "chart_main"
+            ],
+            [
+                "chart_main"
+            ]
+        ]
+    },
+    {
+        "id": "gauge_tegangan",
+        "type": "ui_gauge",
+        "z": "tab_plts",
+        "name": "Tegangan",
+        "group": "grp_power",
+        "order": 1,
+        "width": "3",
+        "height": "3",
         "gtype": "gage",
-        "title": "",
-        "label": "Arus Beban (A)",
-        "format": "",
+        "title": "Tegangan",
+        "label": "V",
+        "format": "{{value}}",
         "min": 0,
-        "max": 10,
+        "max": 20,
         "colors": [
-            "#00b500",
-            "#e6e600",
-            "#ca3838"
+            "#e74c3c",
+            "#f39c12",
+            "#2ecc71"
         ],
-        "seg1": "",
-        "seg2": "",
-        "diff": false,
-        "className": "",
-        "x": 780,
-        "y": 120,
+        "seg1": "10",
+        "seg2": "14",
+        "x": 720,
+        "y": 60,
         "wires": []
     },
     {
-        "id": "c_dayapv",
+        "id": "gauge_arus_pv",
+        "type": "ui_gauge",
+        "z": "tab_plts",
+        "name": "Arus PV",
+        "group": "grp_power",
+        "order": 2,
+        "width": "3",
+        "height": "3",
+        "gtype": "gage",
+        "title": "Arus PV",
+        "label": "A",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 10,
+        "colors": [
+            "#2ecc71",
+            "#f39c12",
+            "#e74c3c"
+        ],
+        "seg1": "3",
+        "seg2": "7",
+        "x": 720,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "gauge_arus_beban",
+        "type": "ui_gauge",
+        "z": "tab_plts",
+        "name": "Arus Beban",
+        "group": "grp_power",
+        "order": 3,
+        "width": "6",
+        "height": "3",
+        "gtype": "gage",
+        "title": "Arus Beban",
+        "label": "A",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 10,
+        "colors": [
+            "#2ecc71",
+            "#f39c12",
+            "#e74c3c"
+        ],
+        "seg1": "3",
+        "seg2": "7",
+        "x": 720,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "chart_daya_pv",
         "type": "ui_chart",
-        "z": "5eda47f28e0e6e37",
+        "z": "tab_plts",
         "name": "Daya PV",
-        "group": "grp1",
-        "order": 4,
-        "width": 6,
-        "height": 3,
+        "group": "grp_daya",
+        "order": 1,
+        "width": "3",
+        "height": "4",
         "label": "Daya PV (W)",
         "chartType": "line",
+        "legend": "false",
         "xformat": "HH:mm:ss",
-        "nodata": "",
+        "interpolate": "linear",
+        "nodata": "—",
         "dot": false,
-        "ymin": "",
+        "ymin": "0",
         "ymax": "",
-        "removeOlder": "",
-        "removeOlderPoints": "",
-        "cutout": "",
-        "useOneColor": false,
-        "useUTC": false,
+        "removeOlder": 1,
+        "removeOlderPoints": "60",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": true,
         "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
+            "#f39c12"
         ],
         "outputs": 1,
-        "useDifferentColor": false,
-        "className": "",
-        "x": 760,
-        "y": 160,
+        "x": 720,
+        "y": 180,
         "wires": [
             []
         ]
     },
     {
-        "id": "c_dayabeban",
+        "id": "chart_daya_beban",
         "type": "ui_chart",
-        "z": "5eda47f28e0e6e37",
+        "z": "tab_plts",
         "name": "Daya Beban",
-        "group": "grp1",
-        "order": 5,
-        "width": 6,
+        "group": "grp_daya",
+        "order": 2,
+        "width": "3",
         "height": "4",
         "label": "Daya Beban (W)",
         "chartType": "line",
+        "legend": "false",
         "xformat": "HH:mm:ss",
-        "nodata": "",
+        "interpolate": "linear",
+        "nodata": "—",
         "dot": false,
-        "ymin": "",
+        "ymin": "0",
         "ymax": "",
-        "removeOlder": "",
-        "removeOlderPoints": "",
-        "cutout": "",
-        "useOneColor": false,
-        "useUTC": false,
+        "removeOlder": 1,
+        "removeOlderPoints": "60",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": true,
         "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
+            "#e74c3c"
         ],
         "outputs": 1,
-        "useDifferentColor": false,
-        "className": "",
-        "x": 780,
-        "y": 200,
+        "x": 720,
+        "y": 220,
         "wires": [
             []
         ]
     },
     {
-        "id": "c_ldr",
-        "type": "ui_chart",
-        "z": "5eda47f28e0e6e37",
-        "name": "Cahaya",
-        "group": "grp1",
-        "order": 6,
-        "width": 6,
-        "height": "4",
-        "label": "Cahaya (LDR)",
-        "chartType": "line",
-        "xformat": "HH:mm:ss",
-        "nodata": "",
-        "dot": false,
-        "ymin": "",
-        "ymax": "",
-        "removeOlder": "",
-        "removeOlderPoints": "",
-        "cutout": "",
-        "useOneColor": false,
-        "useUTC": false,
-        "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "outputs": 1,
-        "useDifferentColor": false,
-        "className": "",
-        "x": 760,
-        "y": 240,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "txt_status",
+        "id": "text_status_baterai",
         "type": "ui_text",
-        "z": "5eda47f28e0e6e37",
-        "group": "grp1",
-        "order": 7,
-        "width": 6,
-        "height": "2",
-        "name": "Status Energi",
-        "label": "Status",
-        "format": "{{msg.payload}}",
-        "layout": "",
-        "className": "",
-        "style": false,
-        "font": "",
-        "fontSize": "",
-        "color": "#000000",
-        "x": 760,
-        "y": 280,
-        "wires": []
-    },
-    {
-        "id": "b633250cd666cd07",
-        "type": "function",
-        "z": "5eda47f28e0e6e37",
-        "name": "function 1",
-        "func": "msg.payload =\nmsg.payload.battery_status;\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 520,
-        "y": 360,
-        "wires": [
-            [
-                "b49fea8942e59b09"
-            ]
-        ]
-    },
-    {
-        "id": "b49fea8942e59b09",
-        "type": "ui_text",
-        "z": "5eda47f28e0e6e37",
-        "group": "grp1",
-        "order": 7,
+        "z": "tab_plts",
+        "group": "grp_daya",
+        "order": 3,
         "width": "6",
-        "height": "2",
-        "name": "",
-        "label": "Status Baterai",
+        "height": "1",
+        "name": "Status Baterai",
         "format": "{{msg.payload}}",
         "layout": "row-spread",
-        "className": "",
-        "style": false,
-        "font": "",
-        "fontSize": 16,
-        "color": "#000000",
-        "x": 760,
-        "y": 360,
+        "x": 720,
+        "y": 340,
         "wires": []
     },
     {
-        "id": "broker1",
+        "id": "chart_cahaya",
+        "type": "ui_chart",
+        "z": "tab_plts",
+        "name": "Cahaya",
+        "group": "grp_cahaya",
+        "order": 1,
+        "width": "4",
+        "height": "4",
+        "label": "Intensitas Cahaya (Lux)",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "—",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "3300",
+        "removeOlder": 1,
+        "removeOlderPoints": "60",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": true,
+        "colors": [
+            "#f1c40f"
+        ],
+        "outputs": 1,
+        "x": 720,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "text_status_energi",
+        "type": "ui_text",
+        "z": "tab_plts",
+        "group": "grp_cahaya",
+        "order": 2,
+        "width": "6",
+        "height": "1",
+        "name": "Status Energi",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 720,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "gauge_pos_h",
+        "type": "ui_gauge",
+        "z": "tab_plts",
+        "name": "Pos H",
+        "group": "grp_tracker",
+        "order": 1,
+        "width": "3",
+        "height": "3",
+        "gtype": "gage",
+        "title": "Posisi H",
+        "label": "°",
+        "format": "{{value}}",
+        "min": 10,
+        "max": 170,
+        "colors": [
+            "#3498db",
+            "#2980b9",
+            "#1abc9c"
+        ],
+        "seg1": "60",
+        "seg2": "120",
+        "x": 720,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "gauge_pos_v",
+        "type": "ui_gauge",
+        "z": "tab_plts",
+        "name": "Pos V",
+        "group": "grp_tracker",
+        "order": 2,
+        "width": "3",
+        "height": "3",
+        "gtype": "gage",
+        "title": "Posisi V",
+        "label": "°",
+        "format": "{{value}}",
+        "min": 10,
+        "max": 170,
+        "colors": [
+            "#3498db",
+            "#2980b9",
+            "#1abc9c"
+        ],
+        "seg1": "60",
+        "seg2": "120",
+        "x": 720,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "text_arah",
+        "type": "ui_text",
+        "z": "tab_plts",
+        "group": "grp_tracker",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "name": "Arah",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 720,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "text_mode",
+        "type": "ui_text",
+        "z": "tab_plts",
+        "group": "grp_tracker",
+        "order": 4,
+        "width": "3",
+        "height": "1",
+        "name": "Mode",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 720,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "chart_main",
+        "type": "ui_chart",
+        "z": "tab_plts",
+        "name": "Chart Utama",
+        "group": "grp_chart",
+        "order": 1,
+        "width": "12",
+        "height": "5",
+        "label": "Tegangan / Arus PV / Daya PV",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "Menunggu data...",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "120",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#f39c12",
+            "#3498db",
+            "#2ecc71",
+            "#e74c3c",
+            "#9b59b6",
+            "#1abc9c",
+            "#34495e"
+        ],
+        "outputs": 1,
+        "x": 720,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "gauge_ldr_atas",
+        "type": "ui_gauge",
+        "z": "tab_plts",
+        "name": "LDR Atas",
+        "group": "grp_ldr",
+        "order": 1,
+        "width": "3",
+        "height": "3",
+        "gtype": "gage",
+        "title": "LDR Atas",
+        "label": "",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 4095,
+        "colors": [
+            "#95a5a6",
+            "#f39c12",
+            "#f1c40f"
+        ],
+        "seg1": "1000",
+        "seg2": "3000",
+        "x": 720,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "gauge_ldr_bawah",
+        "type": "ui_gauge",
+        "z": "tab_plts",
+        "name": "LDR Bawah",
+        "group": "grp_ldr",
+        "order": 2,
+        "width": "3",
+        "height": "3",
+        "gtype": "gage",
+        "title": "LDR Bawah",
+        "label": "",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 4095,
+        "colors": [
+            "#95a5a6",
+            "#f39c12",
+            "#f1c40f"
+        ],
+        "seg1": "1000",
+        "seg2": "3000",
+        "x": 720,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "gauge_ldr_kiri",
+        "type": "ui_gauge",
+        "z": "tab_plts",
+        "name": "LDR Kiri",
+        "group": "grp_ldr",
+        "order": 3,
+        "width": "3",
+        "height": "3",
+        "gtype": "gage",
+        "title": "LDR Kiri",
+        "label": "",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 4095,
+        "colors": [
+            "#95a5a6",
+            "#f39c12",
+            "#f1c40f"
+        ],
+        "seg1": "1000",
+        "seg2": "3000",
+        "x": 720,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "gauge_ldr_kanan",
+        "type": "ui_gauge",
+        "z": "tab_plts",
+        "name": "LDR Kanan",
+        "group": "grp_ldr",
+        "order": 4,
+        "width": "3",
+        "height": "3",
+        "gtype": "gage",
+        "title": "LDR Kanan",
+        "label": "",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 4095,
+        "colors": [
+            "#95a5a6",
+            "#f39c12",
+            "#f1c40f"
+        ],
+        "seg1": "1000",
+        "seg2": "3000",
+        "x": 720,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "mqtt_broker",
         "type": "mqtt-broker",
-        "name": "Local MQTT",
+        "name": "Localhost Broker",
         "broker": "localhost",
         "port": "1883",
-        "autoConnect": true,
+        "clientid": "nodered-plts",
         "usetls": false,
-        "protocolVersion": 4,
-        "keepalive": 15,
+        "compatmode": false,
+        "keepalive": "60",
         "cleansession": true,
-        "autoUnsubscribe": true,
+        "birthTopic": "",
         "birthQos": "0",
-        "willQos": "0"
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
     },
     {
-        "id": "grp1",
+        "id": "grp_power",
         "type": "ui_group",
-        "name": "Monitoring PLTS",
-        "tab": "tab1",
+        "name": "Tegangan & Arus",
+        "tab": "",
         "order": 1,
-        "width": 6
+        "disp": true,
+        "width": "6",
+        "collapse": false
     },
     {
-        "id": "tab1",
-        "type": "ui_tab",
-        "name": "Dashboard PLTS",
-        "icon": "dashboard"
+        "id": "grp_daya",
+        "type": "ui_group",
+        "name": "Daya & Baterai",
+        "tab": "",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false
     },
     {
-        "id": "4c2be91afd9d0a67",
+        "id": "grp_cahaya",
+        "type": "ui_group",
+        "name": "Cahaya & Energi",
+        "tab": "",
+        "order": 3,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "grp_tracker",
+        "type": "ui_group",
+        "name": "Solar Tracker",
+        "tab": "",
+        "order": 4,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "grp_chart",
+        "type": "ui_group",
+        "name": "Grafik Realtime",
+        "tab": "",
+        "order": 5,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "grp_ldr",
+        "type": "ui_group",
+        "name": "LDR Sensor",
+        "tab": "",
+        "order": 6,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "06c5c8c66f6160bc",
         "type": "global-config",
         "env": [],
         "modules": {
