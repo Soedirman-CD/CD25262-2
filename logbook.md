@@ -208,3 +208,36 @@ Anggota
 - [ ] Menambahkan MCB, PIC: @billyhermawan998
 - [ ] Finalisasi program ESP32 dan dashboard, PIC: @ramaniaalifa11
 - [ ] Membuat pamflet produk, PIC: @Nabileft
+
+### 11 Juni 2026
+
+#### Yang sudah dilakukan
+
+- Menambahkan sensor tegangan dan arus ACS712 untuk beban
+
+#### Masalah yang dihadapi
+
+- sensor lux dan tegangan beban masih belum bisa terbaca
+
+#### Yang akan dilakukan
+
+- [ ] Mengganti pin sensor lux dan sensor tegangan menggunakan ADC tambahan, ADS1115, PIC: @billyhermawan998
+- [ ] Memperbarui program arduino dan json flow untuk fitur kontrol manual, PIC: @ramaniaalifa11
+
+### 16 Juni 2026
+
+#### Yang sudah dilakukan
+
+- Memindahkan pin adc untuk sensor tegangan beban, sensor arus beban dan sensor lux ke pin ads1115
+- Memperbarui program dan mengaktifkan fitur kontrol manual untuk servo motor
+
+#### Masalah yang dihadapi
+
+- SCC masih belum bisa menyala karena tegangan dan arus yang kurang dari nilai standar
+
+#### Yang akan dilakukan
+
+- [ ] Kalibrasi sensor beban dan sensor lux, PIC: @billyhermawan998, @ramaniaalifa11, @Nabileft
+- [ ] Membuat video dan poster produk, PIC: @Nabileft, @ramaniaalifa11, @billyhermawan998
+- [ ] Merapikan wiring, PIC: @Nabileft, @ramaniaalifa11, @billyhermawan998
+
