@@ -2,31 +2,40 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
+#include <Wire.h>              
+#include <Adafruit_ADS1X15.h>  
 
 // ===================== WIFI & MQTT =====================
-const char* ssid       = "vivo T1 5G";       
-const char* password   = "12345678";   
-const char* mqttServer = "10.222.112.1";        
+const char* ssid       = "Alifa";
+const char* password   = "Alifa123";
+const char* mqttServer = "10.20.146.254";
 const int   mqttPort   = 1883;
 const char* mqttUser   = "";
 const char* mqttPass   = "";
 
 // ===================== TOPIC MQTT =====================
-#define TOPIC_DATA  "plts/data"   
-#define TOPIC_CMD   "plts/cmd"    
+#define TOPIC_DATA  "plts/data"
+#define TOPIC_CMD   "plts/cmd"
 
 // ===================== PIN =====================
-#define LDR_ATAS         34
-#define LDR_BAWAH        35
-#define LDR_KIRI         32
-#define LDR_KANAN        33
-#define SENSOR_VOLT      39
-#define SENSOR_ARUS      36
-#define TEMT6000_PIN     25
-#define SERVO_HORIZONTAL 26
-#define SERVO_VERTICAL   27
+#define LDR_ATAS            34
+#define LDR_BAWAH           35
+#define LDR_KIRI            32
+#define LDR_KANAN           33
+#define SENSOR_VOLT_PV      39   
+#define SENSOR_ARUS_PV      36   
+// ADS1115 Channel:
+// A0 = Sensor tegangan beban
+// A1 = Sensor TEMT6000 (cahaya)
+// A2 =  Sensor arus beban
+#define SERVO_HORIZONTAL    26
+#define SERVO_VERTICAL      27
 
-// ===================== SERVO H&V =====================
+// ===================== ADS1115 =====================
+Adafruit_ADS1115 ads;
+bool adsReady = false;
+
+// ===================== SERVO =====================
 Servo servoH;
 Servo servoV;
 
@@ -34,113 +43,138 @@ int posisiH = 90;
 int posisiV = 90;
 
 // ===================== PARAMETER =====================
-int batasCahaya  = 30;
-int toleransiYaw = 5;
-int toleransiPitch = 5;
-bool modeManual  = false;
+int  batasCahaya    = 30;
+int  toleransiYaw   = 5;
+int  toleransiPitch = 5;
+bool modeManual     = false;
 
-// ===================== VOLT =====================
-float faktorKalibrasiVolt = 1.1615;
+// ===================== KALIBRASI VOLT =====================
+float faktorKalibrasiVolt      = 1.0388;  
+float faktorKalibrasiVoltBeban = 1.1615;  
 
-// ===================== ACS712 =====================
-float offsetACS       = 2.50;
-float sensitivitasACS = 0.100;
-float arusFilter      = 0;
+// ===================== ACS712 PV =====================
+float offsetACS_PV       = 2.50;
+float sensitivitasACS_PV = 0.100;
+float arusFilter_PV      = 0;
 
-// ===================== BATERAI =====================
-float voltBatFull  = 14.4;   // tegangan 100%
-float voltBatEmpty = 11.0;   // tegangan 0%
-float voltBatMax   = 14.4;   // batas atas charging
-float voltBatMin   = 10.5;   // batas cut-off
+// ===================== ACS712 BEBAN =====================
+float offsetACS_Beban       = 2.50;
+float sensitivitasACS_Beban = 0.100;
+float arusFilter_Beban      = 0;
 
 // ===================== ENERGI =====================
-float energiWhPV    = 0;
-float energiWhBeban = 0;
+float         energiWhPV     = 0;
+float         energiWhBeban  = 0;
 unsigned long lastEnergiTime = 0;
 
 // ===================== MQTT CLIENT =====================
 WiFiClient   espClient;
 PubSubClient mqttClient(espClient);
 
-unsigned long lastPublish    = 0;
-const long    publishInterval = 1000;  // kirim tiap 1 detik
+unsigned long lastPublish     = 0;
+const long    publishInterval = 1000;
 
-// ========================ADC AVERAGING===========================
+// ===================================================
+// ADC AVERAGING (ADC internal ESP32)
+// ===================================================
 int bacaADC(int pin) {
   long total = 0;
-  for (int i = 0; i < 50; i++) {
+  for (int i = 0; i < 20; i++) {
     total += analogRead(pin);
-    delayMicroseconds(150);
+    delayMicroseconds(100);
   }
-  return total / 50;
+  return total / 20;
 }
 
-// =========================VOLTAGE==========================
-float bacaVoltage() {
-  int   adc = bacaADC(SENSOR_VOLT);
-  float v   = (adc * 3.3) / 4095.0;
-  v = v * 5.0 * faktorKalibrasiVolt;
-  return v;
+// ===================================================
+// TEGANGAN PV (ADC internal ESP32)
+// ===================================================
+float bacaVoltagePV() {
+  int   adc = bacaADC(SENSOR_VOLT_PV);
+  float v   = (adc * 3.3f) / 4095.0f;
+  return v * 5.0f * faktorKalibrasiVolt;
 }
 
-// ========================CURRENT===========================
-float bacaArus() {
-  int   adc  = bacaADC(SENSOR_ARUS);
-  float v    = (adc * 3.3) / 4095.0;
-  float arus = (v - offsetACS) / sensitivitasACS;
-  if (abs(arus) < 0.10) arus = 0;
-  arusFilter = (0.85 * arusFilter) + (0.15 * arus);
-  if (arusFilter >  50) arusFilter =  50;
-  if (arusFilter < -50) arusFilter = -50;
-  return arusFilter;
+// ===================================================
+// TEGANGAN BEBAN (via ADS1115 channel A0)
+// ===================================================
+float bacaVoltageBeban() {
+  if (!adsReady) return 0.0f;
+  int16_t raw = ads.readADC_SingleEnded(0); // A0
+  float   v   = ads.computeVolts(raw);
+  return v * 5.0f * faktorKalibrasiVoltBeban;
 }
 
-// =========================TEMT6000==========================
+// ===================================================
+// ARUS PV (ADC internal ESP32)
+// ===================================================
+float bacaArusPV() {
+  int   adc  = bacaADC(SENSOR_ARUS_PV);
+  float v    = (adc * 5.0f) / 4095.0f;
+  float arus = ((v - offsetACS_PV) / sensitivitasACS_PV) * 0.0750f;
+  if (abs(arus) < 0.10f) arus = 0;
+  arusFilter_PV = (0.85f * arusFilter_PV) + (0.15f * arus);
+  arusFilter_PV = constrain(arusFilter_PV, -50.0f, 50.0f);
+  return arusFilter_PV;
+}
+
+// ===================================================
+// ARUS BEBAN (ADC internal ESP32)
+// ===================================================
+float bacaArusBeban() {
+  if (!adsReady) return 0.0f;
+  int16_t raw  = ads.readADC_SingleEnded(2); // A2
+  float   v    = ads.computeVolts(raw);
+  float   arus = (v - offsetACS_Beban) / sensitivitasACS_Beban;
+  if (abs(arus) < 0.10f) arus = 0;
+  arusFilter_Beban = (0.85f * arusFilter_Beban) + (0.15f * arus);
+  arusFilter_Beban = constrain(arusFilter_Beban, -50.0f, 50.0f);
+  return arusFilter_Beban;
+}
+
+// ===================================================
+// TEMT6000 (via ADS1115 channel A1)
+// ===================================================
 float bacaLuxTEMT6000() {
-  int   adc     = bacaADC(TEMT6000_PIN);
-  float voltage = (adc * 3.3) / 4095.0;
-  float lux     = voltage * 1000;
+  if (!adsReady) return 0.0f;
+  int16_t raw     = ads.readADC_SingleEnded(1); // A1
+  float   voltage = ads.computeVolts(raw);
+  float   lux     = voltage * 1000.0f;
   if (lux < 0) lux = 0;
   return lux;
 }
 
-// =========================SOC BATERAI==========================
-float hitungSOC(float voltage) {
-  if (voltage >= voltBatFull)  return 100.0;
-  if (voltage <= voltBatEmpty) return 0.0;
-  float soc = ((voltage - voltBatEmpty) / (voltBatFull - voltBatEmpty)) * 100.0;
-  return constrain(soc, 0.0, 100.0);
-}
-
-// =======================STATUS BATERAI============================
-String statusBaterai(float soc, float arusPV, float voltage) {
-  if (voltage >= voltBatMax)  return "PENUH";
-  if (voltage <= voltBatMin)  return "KRITIS";
-  if (soc >= 80)  return arusPV > 0.2 ? "MENGISI"      : "NORMAL";
-  if (soc >= 40)  return arusPV > 0.2 ? "MENGISI"      : "NORMAL";
-  if (soc >= 20)  return "RENDAH";
-  return "SANGAT RENDAH";
-}
-
-// =======================WIFI CONNECT============================
+// ===================================================
+// KONEKSI WIFI
+// ===================================================
 void connectWiFi() {
+  if (WiFi.status() == WL_CONNECTED) return;
+
   Serial.print("[WiFi] Menghubungkan ke ");
-  Serial.print(ssid);
+  Serial.println(ssid);
+
+  WiFi.disconnect(true);
+  delay(500);
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+
   int attempt = 0;
-  while (WiFi.status() != WL_CONNECTED && attempt < 30) {
+  while (WiFi.status() != WL_CONNECTED && attempt < 20) {
     delay(500);
     Serial.print(".");
     attempt++;
   }
+
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("\n[WiFi] Terhubung! IP: " + WiFi.localIP().toString());
   } else {
-    Serial.println("\n[WiFi] Gagal. Lanjut tanpa WiFi.");
+    Serial.println("\n[WiFi] Gagal terhubung. Lanjut tanpa WiFi.");
   }
 }
 
-// ========================CALLBACK MQTT===========================
+// ===================================================
+// CALLBACK MQTT
+// ===================================================
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
   String msg = "";
   for (unsigned int i = 0; i < length; i++) msg += (char)payload[i];
@@ -149,13 +183,11 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   StaticJsonDocument<256> doc;
   if (deserializeJson(doc, msg)) return;
 
-  // Ganti mode auto/manual
   if (doc.containsKey("mode")) {
     modeManual = (String(doc["mode"].as<const char*>()) == "manual");
     Serial.println("[CMD] Mode: " + String(modeManual ? "MANUAL" : "AUTO"));
   }
 
-  // Gerak manual servo (hanya saat mode manual)
   if (modeManual) {
     if (doc.containsKey("servo_h")) {
       posisiH = constrain((int)doc["servo_h"], 10, 170);
@@ -167,82 +199,98 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  // Reset posisi servo ke tengah
   if (doc.containsKey("reset") && doc["reset"] == true) {
-    posisiH = 90; posisiV = 90;
+    posisiH = 90;
+    posisiV = 90;
     servoH.write(posisiH);
     servoV.write(posisiV);
     Serial.println("[CMD] Posisi reset ke 90/90");
   }
 
-  // Reset akumulasi energi
   if (doc.containsKey("reset_energy") && doc["reset_energy"] == true) {
-    energiWhPV = 0; energiWhBeban = 0;
+    energiWhPV    = 0;
+    energiWhBeban = 0;
     Serial.println("[CMD] Energi direset ke 0");
   }
 }
 
-// ========================MQTT CONNECT===========================
+// ===================================================
+// KONEKSI MQTT
+// ===================================================
 void connectMQTT() {
-  while (!mqttClient.connected()) {
-    Serial.print("[MQTT] Menghubungkan ke broker...");
+  if (WiFi.status() != WL_CONNECTED) return;
+  if (mqttClient.connected()) return;
+
+  int attempt = 0;
+  while (!mqttClient.connected() && attempt < 5) {
+    Serial.printf("[MQTT] Mencoba koneksi ke broker... (percobaan %d/5)\n", attempt + 1);
     String cid = "ESP32-PLTS-" + String(random(0xffff), HEX);
+
     bool ok = (strlen(mqttUser) > 0)
               ? mqttClient.connect(cid.c_str(), mqttUser, mqttPass)
               : mqttClient.connect(cid.c_str());
+
     if (ok) {
-      Serial.println(" Terhubung!");
+      Serial.println("[MQTT] Terhubung!");
       mqttClient.subscribe(TOPIC_CMD);
+      return;
     } else {
-      Serial.print(" Gagal rc=");
-      Serial.print(mqttClient.state());
-      Serial.println(", retry 3s...");
-      delay(3000);
+      Serial.printf("[MQTT] Gagal rc=%d. Tunggu sebentar...\n", mqttClient.state());
+      attempt++;
+      delay(1000);
     }
+  }
+
+  if (!mqttClient.connected()) {
+    Serial.println("[MQTT] Tidak berhasil terhubung. Akan dicoba lagi di iterasi berikutnya.");
   }
 }
 
-// ========================PUBLISH DATA KE MQTT===========================
-void publishData(float voltage, float arusPV, float lux,
-                 int atas, int bawah, int kiri, int kanan,
+// ===================================================
+// PUBLISH DATA KE MQTT
+// ===================================================
+void publishData(float voltPV,    float arusPV,
+                 float voltBeban, float arusBeban,
+                 float lux,
+                 int atas,   int bawah,
+                 int kiri,   int kanan,
                  int errorYaw, int errorPitch,
                  String arahYaw, String arahPitch) {
 
-  // Hitung turunan
-  float arusBeban = (arusPV >= 0) ? arusPV * 0.15 : abs(arusPV);
-  float dayaPV    = voltage * arusPV;
-  float dayaBeban = voltage * arusBeban;
-
-  // SOC & status baterai
-  float  soc      = hitungSOC(voltage);
-  String statBat  = statusBaterai(soc, arusPV, voltage);
+  float dayaPV    = voltPV    * arusPV;
+  float dayaBeban = voltBeban * arusBeban;
 
   // Akumulasi energi
-  unsigned long now = millis();
-  float dtJam       = (now - lastEnergiTime) / 3600000.0;
-  energiWhPV       += dayaPV    * dtJam;
-  energiWhBeban    += dayaBeban * dtJam;
-  lastEnergiTime    = now;
+  unsigned long now   = millis();
+  float         dtJam = (now - lastEnergiTime) / 3600000.0f;
+  energiWhPV         += dayaPV    * dtJam;
+  energiWhBeban      += dayaBeban * dtJam;
+  lastEnergiTime      = now;
 
-  // Status energi
   String statEnergi;
   if      (energiWhPV < 10)  statEnergi = "RENDAH";
   else if (energiWhPV < 100) statEnergi = "SEDANG";
   else                        statEnergi = "TINGGI";
 
-  // Bangun JSON
-  StaticJsonDocument<512> doc;
-  doc["tegangan"]       = serialized(String(voltage,   2));
+  StaticJsonDocument<768> doc;
+
+  // Data PV
+  doc["tegangan_pv"]    = serialized(String(voltPV,    2));
   doc["arus_pv"]        = serialized(String(arusPV,    3));
-  doc["arus_beban"]     = serialized(String(arusBeban, 3));
   doc["daya_pv"]        = serialized(String(dayaPV,    2));
-  doc["daya_beban"]     = serialized(String(dayaBeban, 2));
-  doc["cahaya"]         = serialized(String(lux,       1));
-  doc["soc"]            = serialized(String(soc,       1));
-  doc["status_baterai"] = statBat;
+
+  // Data Beban
+  doc["tegangan_beban"] = serialized(String(voltBeban,  2));
+  doc["arus_beban"]     = serialized(String(arusBeban,  3));
+  doc["daya_beban"]     = serialized(String(dayaBeban,  2));
+
+  // Data umum
+  doc["cahaya"]         = serialized(String(lux,        1));
   doc["energi_pv"]      = serialized(String(energiWhPV,    3));
   doc["energi_beban"]   = serialized(String(energiWhBeban, 3));
   doc["status_energi"]  = statEnergi;
+
+  // Solar tracker
   doc["pos_h"]          = posisiH;
   doc["pos_v"]          = posisiV;
   doc["error_yaw"]      = errorYaw;
@@ -250,21 +298,43 @@ void publishData(float voltage, float arusPV, float lux,
   doc["arah_yaw"]       = arahYaw;
   doc["arah_pitch"]     = arahPitch;
   doc["mode"]           = modeManual ? "MANUAL" : "AUTO";
+
+  // LDR
   doc["ldr_atas"]       = atas;
   doc["ldr_bawah"]      = bawah;
   doc["ldr_kiri"]       = kiri;
   doc["ldr_kanan"]      = kanan;
 
-  char buf[512];
+  // Status ADS1115
+  doc["ads_status"]     = adsReady ? "OK" : "ERROR";
+
+  char buf[768];
   serializeJson(doc, buf);
-  mqttClient.publish(TOPIC_DATA, buf);
+
+  if (mqttClient.publish(TOPIC_DATA, buf)) {
+    Serial.println("[MQTT] Data terkirim.");
+  } else {
+    Serial.println("[MQTT] Gagal kirim data.");
+  }
 }
 
-// ========================SETUP===========================
+// ===================================================
+// SETUP
+// ===================================================
 void setup() {
   Serial.begin(115200);
+  delay(1000);
 
-  delay(5000);
+  // Inisialisasi I2C dan ADS1115
+  Wire.begin(21, 22); // SDA = GPIO21, SCL = GPIO22
+  if (!ads.begin()) {
+    Serial.println("[ADS1115] GAGAL! Cek wiring I2C (SDA=21, SCL=22).");
+    adsReady = false;
+  } else {
+    ads.setGain(GAIN_ONE); // Range ±4.096V, resolusi 0.125mV/bit
+    adsReady = true;
+    Serial.println("[ADS1115] Siap. Channel A0=Tegangan Beban, A1=TEMT6000");
+  }
 
   analogReadResolution(12);
   analogSetAttenuation(ADC_11db);
@@ -273,78 +343,82 @@ void setup() {
   servoV.attach(SERVO_VERTICAL);
   servoH.write(posisiH);
   servoV.write(posisiV);
-
-  delay(1000);
+  delay(500);
 
   connectWiFi();
+
   mqttClient.setServer(mqttServer, mqttPort);
   mqttClient.setCallback(mqttCallback);
-  mqttClient.setBufferSize(512);
+  mqttClient.setBufferSize(768);
+
+  if (WiFi.status() == WL_CONNECTED) {
+    connectMQTT();
+  }
 
   lastEnergiTime = millis();
-
   Serial.println("===== SOLAR TRACKER READY =====");
 }
 
-// ==========================LOOP=========================
+// ===================================================
+// LOOP
+// ===================================================
 void loop() {
 
-  // koneksi WiFi & MQTT
-  if (WiFi.status() != WL_CONNECTED) connectWiFi();
-  if (!mqttClient.connected())        connectMQTT();
+  // Jaga koneksi WiFi & MQTT
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("[WiFi] Koneksi terputus, mencoba reconnect...");
+    connectWiFi();
+    return;
+  }
+
+  if (!mqttClient.connected()) {
+    connectMQTT();
+    return;
+  }
+
   mqttClient.loop();
 
-  // ===================== LDR =====================
+  // ===================== BACA LDR =====================
   int atas  = bacaADC(LDR_ATAS);
   int bawah = bacaADC(LDR_BAWAH);
   int kiri  = bacaADC(LDR_KIRI);
   int kanan = bacaADC(LDR_KANAN);
 
-  // ===================== SENSOR =====================
-  float voltage = bacaVoltage();
-  float current = bacaArus();
-  float lux     = bacaLuxTEMT6000();
+  // ===================== BACA SENSOR PV =====================
+  float voltPV  = bacaVoltagePV();
+  float arusPV  = bacaArusPV();
 
-  // ===================== ERROR =====================
+  // ===================== BACA SENSOR BEBAN (via ADS1115) =====================
+  float voltBeban = bacaVoltageBeban();
+  float arusBeban = bacaArusBeban();
+
+  // ===================== BACA CAHAYA (via ADS1115) =====================
+  float lux = bacaLuxTEMT6000();
+
+  // ===================== HITUNG ERROR =====================
   int errorYaw   = kiri - kanan;
-  int errorPitch = atas - bawah;
+  int errorPitch = atas  - bawah;
 
   String arahYaw   = "LOCK";
   String arahPitch = "LOCK";
 
-  // ===================== YAW CONTROL =====================
+  // ===================== KONTROL SERVO AUTO =====================
   if (!modeManual) {
 
+    // Yaw (horizontal)
     if (min(kiri, kanan) < batasCahaya) {
-      if (errorYaw > toleransiYaw) {
-        posisiH--;
-        arahYaw = "RIGHT";
-      }
-      else if (errorYaw < -toleransiYaw) {
-        posisiH++;
-        arahYaw = "LEFT";
-      }
-      else {
-        arahYaw = "CENTER";
-      }
+      if      (errorYaw >  toleransiYaw)  { posisiH--; arahYaw = "RIGHT"; }
+      else if (errorYaw < -toleransiYaw)  { posisiH++; arahYaw = "LEFT";  }
+      else                                 { arahYaw = "CENTER"; }
     }
 
-    // ===================== PITCH CONTROL =====================
+    // Pitch (vertikal)
     if (min(atas, bawah) < batasCahaya) {
-      if (errorPitch > toleransiPitch) {
-        posisiV--;
-        arahPitch = "DOWN";
-      }
-      else if (errorPitch < -toleransiPitch) {
-        posisiV++;
-        arahPitch = "UP";
-      }
-      else {
-        arahPitch = "CENTER";
-      }
+      if      (errorPitch >  toleransiPitch) { posisiV--; arahPitch = "DOWN"; }
+      else if (errorPitch < -toleransiPitch) { posisiV++; arahPitch = "UP";   }
+      else                                    { arahPitch = "CENTER"; }
     }
 
-    // ===================== LIMIT SERVO =====================
     posisiH = constrain(posisiH, 10, 170);
     posisiV = constrain(posisiV, 10, 170);
 
@@ -354,41 +428,38 @@ void loop() {
 
   // ===================== SERIAL OUTPUT =====================
   Serial.println("================================");
-
-  Serial.print("LDR ATAS   : "); Serial.println(atas);
-  Serial.print("LDR BAWAH  : "); Serial.println(bawah);
-  Serial.print("LDR KIRI   : "); Serial.println(kiri);
-  Serial.print("LDR KANAN  : "); Serial.println(kanan);
-
+  Serial.printf("LDR  ATAS  : %d\n", atas);
+  Serial.printf("LDR  BAWAH : %d\n", bawah);
+  Serial.printf("LDR  KIRI  : %d\n", kiri);
+  Serial.printf("LDR  KANAN : %d\n", kanan);
   Serial.println("--------------------------------");
-
-  Serial.print("ERROR YAW   : "); Serial.println(errorYaw);
-  Serial.print("ERROR PITCH : "); Serial.println(errorPitch);
-
+  Serial.printf("ERROR YAW   : %d\n", errorYaw);
+  Serial.printf("ERROR PITCH : %d\n", errorPitch);
   Serial.println("--------------------------------");
-
-  Serial.print("GERAK YAW   : "); Serial.println(arahYaw);
-  Serial.print("GERAK PITCH : "); Serial.println(arahPitch);
-
+  Serial.printf("GERAK YAW   : %s\n", arahYaw.c_str());
+  Serial.printf("GERAK PITCH : %s\n", arahPitch.c_str());
   Serial.println("--------------------------------");
-
-  Serial.print("VOLTAGE : "); Serial.print(voltage, 2); Serial.println(" V");
-  Serial.print("CURRENT : "); Serial.print(current, 3); Serial.println(" A");
-  Serial.print("LUX TEMT6000 : "); Serial.println(lux);
-
+  Serial.printf("VOLT PV     : %.2f V\n", voltPV);
+  Serial.printf("ARUS PV     : %.3f A\n", arusPV);
+  Serial.printf("DAYA PV     : %.2f W\n", voltPV * arusPV);
   Serial.println("--------------------------------");
-
-  Serial.print("POS H/V : ");
-  Serial.print(posisiH); Serial.print(" / "); Serial.println(posisiV);
-  Serial.print("MODE    : "); Serial.println(modeManual ? "MANUAL" : "AUTO");
-
+  Serial.printf("VOLT BEBAN  : %.2f V\n", voltBeban);
+  Serial.printf("ARUS BEBAN  : %.3f A\n", arusBeban);
+  Serial.printf("DAYA BEBAN  : %.2f W\n", voltBeban * arusBeban);
+  Serial.println("--------------------------------");
+  Serial.printf("LUX         : %.1f\n", lux);
+  Serial.printf("ADS1115     : %s\n", adsReady ? "OK" : "ERROR");
+  Serial.printf("POS H / V   : %d / %d\n", posisiH, posisiV);
+  Serial.printf("MODE        : %s\n", modeManual ? "MANUAL" : "AUTO");
   Serial.println("================================");
 
   // ===================== PUBLISH MQTT =====================
   unsigned long now = millis();
   if (now - lastPublish >= publishInterval) {
     lastPublish = now;
-    publishData(voltage, current, lux,
+    publishData(voltPV, arusPV,
+                voltBeban, arusBeban,
+                lux,
                 atas, bawah, kiri, kanan,
                 errorYaw, errorPitch,
                 arahYaw, arahPitch);
