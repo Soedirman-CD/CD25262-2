@@ -241,3 +241,18 @@ Anggota
 - [ ] Membuat video dan poster produk, PIC: @Nabileft, @ramaniaalifa11, @billyhermawan998
 - [ ] Merapikan wiring, PIC: @Nabileft, @ramaniaalifa11, @billyhermawan998
 
+### 20 Juni 2026
+
+#### Yang sudah dilakukan
+
+- SCC sudah dapat digunakan
+- Sensor sudah terkalibrasi
+- Sudah membuat video dan poster produk
+
+#### Masalah yang dihadapi
+
+- Tidak ada
+
+#### Yang akan dilakukan
+
+- [ ] Pelaksanaan ekspo, PIC: @ramaniaalifa11, @Nabileft, @billyhermawan998
