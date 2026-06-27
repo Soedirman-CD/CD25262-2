@@ -205,7 +205,6 @@ Anggota
 #### Yang akan dilakukan
 
 - [ ] Menambahkan sensor arus ACS712, PIC: @billyhermawan998
-- [ ] Menambahkan MCB, PIC: @billyhermawan998
 - [ ] Finalisasi program ESP32 dan dashboard, PIC: @ramaniaalifa11
 - [ ] Membuat pamflet produk, PIC: @Nabileft
 
